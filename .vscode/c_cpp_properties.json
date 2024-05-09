@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/node_modules/node-addon-api",
+                "~/.volta/tools/image/node/20.0.0/include/node",
+                "/opt/homebrew/include",
+                "../machine-emulator-tools/sys-utils/libcmt/_install/include"
+            ],
+            "defines": [],
+            "macFrameworkPath": [
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX14.sdk/System/Library/Frameworks"
+            ],
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "macos-clang-arm64",
+            "compilerPath": "/opt/homebrew/opt/llvm@15/bin/clang++"
+        }
+    ],
+    "version": 4
+}

@@ -1,0 +1,8 @@
+/build
+/dist
+/lib/binding/*
+/node_modules
+*.log
+test/snapshot
+linux.bin
+rootfs.ext2
