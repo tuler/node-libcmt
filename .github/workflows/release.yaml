@@ -132,6 +132,8 @@ jobs:
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+            - run: ls node-libcmt/build/stage/${{ steps.version.outputs.current-version }}
+
             - name: Publish binaries
               uses: softprops/action-gh-release@v2
               if: steps.changesets.outputs.hasChangesets == 'false'
