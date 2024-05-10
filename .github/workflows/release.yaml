@@ -111,7 +111,7 @@ jobs:
               id: version
               uses: martinbeentjes/npm-get-version-action@v1.3.1
               with:
-                  path: node-libcmt/package.json
+                  path: node-libcmt
 
             - name: Download binaries
               uses: actions/download-artifact@v4
