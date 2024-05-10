@@ -64,19 +64,19 @@ Napi::Object Rollup::Init(Napi::Env env, Napi::Object exports)
 Rollup::Rollup(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Rollup>(info)
 {
     Napi::Env env = info.Env();
-    int err = cmt_rollup_init(this->rollup);
+    int err = cmt_rollup_init(&this->rollup);
     THROW_IF_ERROR_VOID(env, err);
 }
 
 void Rollup::Finalize(Napi::Env env)
 {
-    cmt_rollup_fini(this->rollup);
+    cmt_rollup_fini(&this->rollup);
 }
 
 Napi::Value Rollup::Finish(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    if (info.Length() != 1 || info[0].IsBoolean())
+    if (info.Length() != 1 || !info[0].IsBoolean())
     {
         Napi::TypeError::New(env, "Wrong argument #0, expecting boolean").ThrowAsJavaScriptException();
         return Napi::Value();
@@ -87,13 +87,14 @@ Napi::Value Rollup::Finish(const Napi::CallbackInfo &info)
         .next_request_type = 0,
         .next_request_payload_length = 0,
     };
-    int err = cmt_rollup_finish(this->rollup, &data);
+    int err = cmt_rollup_finish(&this->rollup, &data);
     THROW_IF_ERROR(env, err);
 
     if (data.next_request_type == HTIF_YIELD_REASON_ADVANCE)
     {
         cmt_rollup_advance_t advance;
-        cmt_rollup_read_advance_state(this->rollup, &advance);
+        cmt_rollup_read_advance_state(&this->rollup, &advance);
+        printf("Advance: %d\n", advance.payload_length);
         Napi::Object object = Napi::Object::New(env);
         object.Set("type", "advance");
         object.Set("app_contract", Napi::String::New(env, hex(advance.app_contract, CMT_ADDRESS_LENGTH)));
@@ -108,7 +109,7 @@ Napi::Value Rollup::Finish(const Napi::CallbackInfo &info)
     else if (data.next_request_type == HTIF_YIELD_REASON_INSPECT)
     {
         cmt_rollup_inspect_t inspect;
-        cmt_rollup_read_inspect_state(this->rollup, &inspect);
+        cmt_rollup_read_inspect_state(&this->rollup, &inspect);
         Napi::Object object = Napi::Object::New(env);
         object.Set("type", "advance");
         object.Set("payload", Napi::ArrayBuffer::New(env, inspect.payload, inspect.payload_length));
@@ -124,9 +125,9 @@ Napi::Value Rollup::Finish(const Napi::CallbackInfo &info)
 Napi::Value Rollup::EmitVoucher(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    if (info.Length() != 1 || info[0].IsArrayBuffer())
+    if (info.Length() != 1 || !info[0].IsObject())
     {
-        Napi::TypeError::New(env, "Wrong argument #0, expecting ArrayBuffer").ThrowAsJavaScriptException();
+        Napi::TypeError::New(env, "Wrong argument #0, expecting Object").ThrowAsJavaScriptException();
         return Napi::Value();
     }
 
@@ -148,9 +149,9 @@ Napi::Value Rollup::EmitVoucher(const Napi::CallbackInfo &info)
 Napi::Value Rollup::EmitNotice(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    if (info.Length() != 1 || info[0].IsArrayBuffer())
+    if (info.Length() != 1 || !info[0].IsObject())
     {
-        Napi::TypeError::New(env, "Wrong argument #0, expecting ArrayBuffer").ThrowAsJavaScriptException();
+        Napi::TypeError::New(env, "Wrong argument #0, expecting Object").ThrowAsJavaScriptException();
         return Napi::Value();
     }
 
@@ -165,7 +166,7 @@ Napi::Value Rollup::EmitNotice(const Napi::CallbackInfo &info)
 void Rollup::EmitReport(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    if (info.Length() != 1 || info[0].IsArrayBuffer())
+    if (info.Length() != 1 || !info[0].IsObject())
     {
         Napi::TypeError::New(env, "Wrong argument #0, expecting ArrayBuffer").ThrowAsJavaScriptException();
         return;
@@ -180,7 +181,7 @@ void Rollup::EmitReport(const Napi::CallbackInfo &info)
 void Rollup::EmitException(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    if (info.Length() != 1 || info[0].IsArrayBuffer())
+    if (info.Length() != 1 || !info[0].IsObject())
     {
         Napi::TypeError::New(env, "Wrong argument #0, expecting ArrayBuffer").ThrowAsJavaScriptException();
         return;
@@ -195,11 +196,11 @@ void Rollup::EmitException(const Napi::CallbackInfo &info)
 void Rollup::Progress(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
-    if (info.Length() != 1 || info[0].IsNumber())
+    if (info.Length() != 1 || !info[0].IsNumber())
     {
         Napi::TypeError::New(env, "Wrong argument #0, expecting number").ThrowAsJavaScriptException();
         return;
     }
-    int err = cmt_rollup_progress(this->rollup, info[0].As<Napi::Number>().Uint32Value());
+    int err = cmt_rollup_progress(&this->rollup, info[0].As<Napi::Number>().Uint32Value());
     THROW_IF_ERROR_VOID(env, err);
 }

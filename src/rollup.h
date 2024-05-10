@@ -3,7 +3,10 @@
 #define NODE_LIBCMT_ROLLUP_H
 
 #include <napi.h>
+extern "C"
+{
 #include "libcmt/rollup.h"
+}
 
 class Rollup : public Napi::ObjectWrap<Rollup>
 {
@@ -19,7 +22,7 @@ private:
     void EmitReport(const Napi::CallbackInfo &info);
     void EmitException(const Napi::CallbackInfo &info);
     void Progress(const Napi::CallbackInfo &info);
-    cmt_rollup_t *rollup;
+    cmt_rollup_t rollup;
 };
 
 #endif
